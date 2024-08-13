@@ -42,14 +42,14 @@ const ChatCliente = () => {
         <main className="flex h-screen gap-3 p-3 bg-secondary-95 relative">
             {/* Fila de espera */}
             {isInQueue && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-secondary-10 bg-opacity-99 flex items-center justify-center z-50">
                     <div className="flex flex-col items-center gap-3 p-6 rounded-lg text-white text-center">
                         <button
                             onClick={handleLogout}
-                            className="text-secondary-99 fixed right-3 top-3 flex items-center gap-2 text-xl py-2 px-4 rounded-lg border-2 border-secondary-99 cursor-pointer hover:bg-warning-30 hover:text-primary-70 hover:border-primary-70"
+                            className="text-secondary-99 fixed left-3 top-3 flex items-center gap-2 py-2 px-4 rounded-lg border text-sm border-secondary-99 cursor-pointer hover:bg-warning-30 hover:text-primary-70 hover:border-primary-70"
                         >
-                            Sair
                             <FiLogOut />
+                            Sair da fila
                         </button>
                         {queueStatus?.message} Posição na fila: {queueStatus?.position}
                         <div className="w-10 h-10 border-2 border-primary-80 rounded-full border-t-primary-30 animate-spin"></div>
