@@ -6,12 +6,10 @@ import { useEffect, useRef } from "react";
 import { FiSend, FiLogOut } from "react-icons/fi";
 
 const ChatCliente = () => {
-    const { messages, newMessage, setNewMessage, sendMessage, username } = useSignalR();
+    const { messages, newMessage, setNewMessage, sendMessage, username, queueStatus } = useSignalR();
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    const isMyMessage = (sender: string) => sender === username;
 
     const handleLogout = () => {
         localStorage.removeItem("username");
@@ -38,20 +36,41 @@ const ChatCliente = () => {
         }
     }, [messages]);
 
+    const isInQueue = queueStatus?.position != null && queueStatus.position > 0;
+
     return (
-        <main className="flex h-screen gap-3 p-3 bg-secondary-95">
+        <main className="flex h-screen gap-3 p-3 bg-secondary-95 relative">
+            {/* Fila de espera */}
+            {isInQueue && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="flex flex-col items-center gap-3 p-6 rounded-lg text-white text-center">
+                        <button
+                            onClick={handleLogout}
+                            className="text-secondary-99 fixed right-3 top-3 flex items-center gap-2 text-xl py-2 px-4 rounded-lg border-2 border-secondary-99 cursor-pointer hover:bg-warning-30 hover:text-primary-70 hover:border-primary-70"
+                        >
+                            Sair
+                            <FiLogOut />
+                        </button>
+                        {queueStatus?.message} Posição na fila: {queueStatus?.position}
+                        <div className="w-10 h-10 border-2 border-primary-80 rounded-full border-t-primary-30 animate-spin"></div>
+                    </div>
+                </div>
+            )}
             {/* Chat */}
             <section className="flex flex-col h-full w-full">
                 <div className="flex justify-between items-center w-full mb-3">
                     <h1 className="text-xl text-primary-40 font-medium">Bem-vindo, {username}</h1>
-                    {/* botão de sair */}
-                    <button
-                        onClick={handleLogout}
-                        className="text-primary-40 flex items-center gap-2 text-xl py-2 px-4 rounded-lg border-none cursor-pointer hover:bg-primary-30 hover:text-secondary-99"
-                    >
-                        Sair
-                        <FiLogOut />
-                    </button>
+                    {isInQueue ? (
+                        <></>
+                    ) : (
+                        <button
+                            onClick={handleLogout}
+                            className="text-primary-40 flex items-center gap-2 text-xl py-2 px-4 rounded-lg border-none cursor-pointer hover:bg-primary-30 hover:text-secondary-99"
+                        >
+                            Sair
+                            <FiLogOut />
+                        </button>
+                    )}
                 </div>
                 <div className="flex-grow overflow-y-auto w-full flex flex-col">
                     {messages.length > 0 ? (
@@ -59,15 +78,13 @@ const ChatCliente = () => {
                             {messages.map((msg, index) => (
                                 <div
                                     key={index}
-                                    className={`p-2 mb-2 rounded-lg ${isMyMessage(msg.sender)
-                                            ? 'bg-primary-70 self-end text-left ml-80'
-                                            : 'bg-secondary-90 text-left mr-80'
+                                    className={`p-2 mb-2 rounded-lg ${msg.type === 'sent'
+                                        ? 'bg-primary-70 self-end text-left ml-80'
+                                        : 'bg-secondary-90 text-left mr-80'
                                         }`}
                                 >
+                                    <p className="break-words text-sm text-primary-30">{msg.sender}</p>
                                     <p className="break-words">{msg.content}</p>
-                                    <p className="text-xs text-right text-secondary-40">
-                                        {new Date(msg.sentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </p>
                                 </div>
                             ))}
                             <div ref={messagesEndRef} />
@@ -84,10 +101,11 @@ const ChatCliente = () => {
                         onChange={(e) => setNewMessage(e.target.value)}
                         className="border border-neutral-50 p-2 mr-2 rounded-lg w-full focus:outline-none"
                         placeholder="Digite sua mensagem"
+                        disabled={isInQueue}
                     />
                     <button
                         type="submit"
-                        disabled={newMessage.trim() === ""}
+                        disabled={newMessage.trim() === "" || isInQueue}
                         className={`text-lg h-full py-2 px-4 rounded-lg cursor-pointer flex items-center justify-center ${newMessage.trim() === "" ? 'bg-neutral-300 text-neutral-500 cursor-not-allowed' : 'bg-primary-70 text-secondary-10 hover:bg-primary-30 hover:text-secondary-90'}`}
                     >
                         <FiSend />

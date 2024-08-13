@@ -21,7 +21,7 @@ const Page = () => {
                 <Image 
                     src={loginImage}
                     alt="Login Image" 
-                    className="max-w-full h-auto rounded-lg"
+                    className="w-1/2 h-auto rounded-lg"
                 />
             </section>
             <div className="w-0.5 h-4/6 bg-secondary-90"></div>
