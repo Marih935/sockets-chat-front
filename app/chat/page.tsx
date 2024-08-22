@@ -80,7 +80,7 @@ const ChatCliente = () => {
                                     key={index}
                                     className={`p-2 mb-2 rounded-lg ${msg.type === 'sent'
                                         ? 'bg-primary-70 self-end text-left ml-80'
-                                        : 'bg-secondary-90 text-left mr-80'
+                                        : 'bg-secondary-90 self-start text-left mr-80'
                                         }`}
                                 >
                                     <p className="break-words text-sm text-primary-30">{msg.sender}</p>
