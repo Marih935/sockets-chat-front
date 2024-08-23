@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.7",
     "chat-app": "file:",
     "next": "14.2.5",
     "react": "^18",

@@ -36,7 +36,7 @@ const ChatCliente = () => {
         }
     }, [messages]);
 
-    const isInQueue = queueStatus?.position != null && queueStatus.position > 0;
+    const isInQueue = queueStatus?.position != null && queueStatus.position >= 0;
 
     return (
         <main className="flex h-screen gap-3 p-3 bg-secondary-95 relative">
@@ -51,7 +51,7 @@ const ChatCliente = () => {
                             <FiLogOut />
                             Sair da fila
                         </button>
-                        {queueStatus?.message} Posição na fila: {queueStatus?.position}
+                            {queueStatus?.message}
                         <div className="w-10 h-10 border-2 border-primary-80 rounded-full border-t-primary-30 animate-spin"></div>
                     </div>
                 </div>
