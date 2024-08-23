@@ -34,9 +34,9 @@ const useSignalR = () => {
 
                 // Atualizações da fila de espera
                 connect.on("QueueUpdate", (response) => {
-                    const { message, queuePosition, exitQueue, queueSize } = response;
+                    const { message, queuePosition, exitQueue, queueSize, isConnected } = response;
                     if(queuePosition == 0){
-                        if(queuePosition == 0 && queueSize == 0){
+                        if(queuePosition == 0 && queueSize == 0 || isConnected){
                             setQueueStatus(null);
                             setMessages(prevMessages => [...prevMessages, { sender: 'Sistema', content: "Você está conectado.", type: 'received' }]);
                         }else{
