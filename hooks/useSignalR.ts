@@ -22,35 +22,43 @@ const useSignalR = () => {
 
         const connect = new signalR.HubConnectionBuilder()
             .withUrl("http://localhost:5151/chat")
-            .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
+
+
+        // Receber mensagens do SignalR
+                connect.on("ReceiveMessage", (response) => {
+                    const { userName, message } = response;
+                    setMessages(prevMessages => [...prevMessages, { sender: userName, content: message, type: 'received' }]);
+                });
+
+                // Atualizações da fila de espera
+                connect.on("QueueUpdate", (response) => {
+                    const { message, queuePosition, exitQueue, queueSize } = response;
+                    if(queuePosition == 0){
+                        if(queuePosition == 0 && queueSize == 0){
+                            setQueueStatus(null);
+                            setMessages(prevMessages => [...prevMessages, { sender: 'Sistema', content: "Você está conectado.", type: 'received' }]);
+                        }else{
+                            setQueueStatus({ message: "Você é o primeiro da fila. Aguarde... ", position: queuePosition });
+                        }
+                    }else if (queuePosition > 0) {
+                        setQueueStatus({ message: message + " Posição na Fila: " + queuePosition, position: queuePosition });
+                    }else if(exitQueue){
+                        setQueueStatus({message: message + " Posição na Fila: " + queuePosition, position: queuePosition});
+                    }
+                });
+
+                // Notificação de conexão
+                connect.on("connected", (response) => {
+                    const { message } = response;
+                    setMessages(prevMessages => [...prevMessages, { sender: 'Sistema', content: message, type: 'received' }]);
+                });
 
         connect.start()
             .then(() => {
                 console.log("Conectado ao SignalR Hub");
                 setConnection(connect);
-
-                connect.on("ReceiveMessage", (sender, content, sentTime) => {
-                    console.log("Mensagem recebida:", sender, content, sentTime);
-                    if (sender !== username) {
-                        setMessages(prevMessages => {
-                            const messageExists = prevMessages.some(
-                                msg => msg.sender === sender && msg.content === content
-                            );
-                            if (!messageExists) {
-                                return [...prevMessages, { sender, content, sentTime, type: 'received' }];
-                            }
-                            return prevMessages;
-                        });
-                    }
-                });
-
-                connect.on("QueueUpdate", (message: string, position: number) => {
-                    console.log("Atualização da Fila:", message, position);
-                    setQueueStatus({ message, position: position + 1 });
-                });
-
             })
             .catch((err) => {
                 console.error("Erro ao conectar com SignalR Hub:", err);
@@ -69,17 +77,8 @@ const useSignalR = () => {
                     content: newMessage,
                     type: 'sent'
                 };
-                console.log("Enviando mensagem:", messageToSend);
-                await connection.send("SendMessage", username, newMessage);
-                setMessages(prevMessages => {
-                    const messageExists = prevMessages.some(
-                        msg => msg.sender === username && msg.content === newMessage
-                    );
-                    if (!messageExists) {
-                        return [...prevMessages, messageToSend];
-                    }
-                    return prevMessages;
-                });
+                await connection.invoke("SendMessage", username, newMessage);
+                setMessages(prevMessages => [...prevMessages, messageToSend]);
                 setNewMessage("");
             } catch (err) {
                 console.error("Falha ao enviar mensagem:", err);
